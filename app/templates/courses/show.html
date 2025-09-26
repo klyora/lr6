@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ course.name }}</h1>
+    <p>{{ course.full_desc }}</p>
+    <p>Рейтинг: {{ course.rating | round(2) }} ({{ course.rating_num }} оценок)</p>
+
+    <a href="{{ url_for('courses.reviews', course_id=course.id) }}">Все отзывы</a>
+
+    <hr>
+
+    <h3>Последние отзывы</h3>
+    {% if reviews %}
+        {% for review in reviews %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ review.user.full_name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ review.created_at.strftime('%Y-%m-%d %H:%M') }} - Оценка: {{ review.rating }}</h6>
+                    <p class="card-text">{{ review.text }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Пока нет ни одного отзыва.</p>
+    {% endif %}
+
+    <hr>
+
+    {% if current_user.is_authenticated %}
+        {% if user_review %}
+            <h3>Ваш отзыв</h3>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ user_review.user.full_name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ user_review.created_at.strftime('%d-%m-%Y %H:%M') }} - Оценка: {{ user_review.rating }}</h6>
+                    <p class="card-text">{{ user_review.text }}</p>
+                </div>
+            </div>
+        {% else %}
+            <h3>Оставить отзыв</h3>
+            <form method="POST" action="{{ url_for('courses.add_review', course_id=course.id) }}">
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Оценка</label>
+                    <select class="form-select" id="rating" name="rating">
+                        <option value="5">отлично</option>
+                        <option value="4">хорошо</option>
+                        <option value="3">удовлетворительно</option>
+                        <option value="2">неудовлетворительно</option>
+                        <option value="1">плохо</option>
+                        <option value="0">ужасно</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="text" class="form-label">Текст отзыва</label>
+                    <textarea class="form-control" id="text" name="text" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Отправить</button>
+            </form>
+        {% endif %}
+    {% else %}
+        <p>Чтобы оставить отзыв, пожалуйста, <a href="{{ url_for('auth.login') }}">войдите</a>.</p>
+    {% endif %}
+
+</div>
+{% endblock %}
